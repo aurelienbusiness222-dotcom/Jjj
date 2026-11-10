@@ -12,11 +12,22 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
+      - name: Dézipper si besoin
+        run: |
+          for z in $(find . -name '*.zip' -not -path './.git/*'); do
+            echo "Dézippage de $z"
+            unzip -o -q "$z" -d "$(dirname "$z")"
+          done
+      - name: Contenu du dépôt
+        run: find . -not -path './.git/*' -type f | head -n 60
       - name: Build
         run: |
-          DIR=$(dirname "$(find . -name 'settings.gradle*' | head -n1)")
-          echo "Projet trouvé dans : $DIR"
-          cd "$DIR"
+          S=$(find . -name 'settings.gradle*' | head -n1)
+          if [ -z "$S" ]; then
+            echo "ERREUR : aucun settings.gradle trouvé. Le projet n'est pas dans le dépôt."
+            exit 1
+          fi
+          cd "$(dirname "$S")"
           gradle assembleDebug
       - uses: actions/upload-artifact@v4
         with:
