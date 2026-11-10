@@ -14,7 +14,8 @@ jobs:
           gradle-version: "8.9"
       - name: Dézipper si besoin
         run: |
-          for z in $(find . -name '*.zip' -not -path './.git/*'); do
+          find . -iname '*.zip' -not -path './.git/*' -print0 | while IFS= read -r -d '' z; do
+            echo "Dézippage de : $z"
             unzip -o -q "$z" -d "$(dirname "$z")"
           done
       - name: Build
